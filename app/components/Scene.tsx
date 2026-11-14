@@ -112,7 +112,7 @@ function Sky({ night }: { night: boolean }) {
       <directionalLight
         ref={light}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-14}
         shadow-camera-right={14}
         shadow-camera-top={14}
@@ -352,6 +352,7 @@ const SpeechBubble = forwardRef<THREE.Sprite, { text: string }>(function SpeechB
     t.colorSpace = THREE.SRGBColorSpace;
     return t;
   }, [text]);
+  useEffect(() => () => tex.dispose(), [tex]);
   return (
     <sprite ref={ref} position={[0, 1.55, 0]} scale={[2.6, 0.81, 1]} renderOrder={10}>
       <spriteMaterial map={tex} transparent opacity={0} depthTest={false} toneMapped={false} fog={false} />

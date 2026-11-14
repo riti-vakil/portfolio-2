@@ -208,7 +208,16 @@ export default function Game() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">
-      <Canvas shadows camera={{ position: [0, 4.4, 21], fov: 42 }}>
+      <Canvas
+        shadows
+        dpr={[1, 1.5]}
+        gl={{ powerPreference: "high-performance" }}
+        camera={{ position: [0, 4.4, 21], fov: 42 }}
+        onCreated={({ gl }) => {
+          // Let the browser restore the context instead of leaving a dead canvas.
+          gl.domElement.addEventListener("webglcontextlost", (e) => e.preventDefault());
+        }}
+      >
         <Scene night={night} section={section} />
       </Canvas>
 
