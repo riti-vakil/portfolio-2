@@ -6,6 +6,10 @@ let birdTimer: ReturnType<typeof setInterval> | undefined;
 let night = false;
 let muted = false;
 
+// A hot-reload re-evaluates this module and would orphan a still-playing context; close it.
+const stale = globalThis as unknown as { __portfolioAudio?: AudioContext };
+if (typeof window !== "undefined") void stale.__portfolioAudio?.close().catch(() => {});
+
 function noise(c: AudioContext) {
   const buf = c.createBuffer(1, c.sampleRate * 4, c.sampleRate);
   const d = buf.getChannelData(0);
@@ -47,11 +51,13 @@ function applyMode() {
 
 export function initAudio() {
   if (ctx) {
-    if (ctx.state === "suspended") void ctx.resume();
+    if (!muted && ctx.state === "suspended") void ctx.resume();
+    birdTimer ??= setInterval(() => Math.random() > 0.45 && chirp(), 3200);
     return;
   }
   const c = new AudioContext();
   ctx = c;
+  stale.__portfolioAudio = c;
   master = c.createGain();
   master.gain.value = muted ? 0 : 0.7;
   master.connect(c.destination);
@@ -90,6 +96,7 @@ export function initAudio() {
   birdTimer = setInterval(() => Math.random() > 0.45 && chirp(), 3200);
 
   applyMode();
+  if (muted) void c.suspend();
 }
 
 export function setNightMode(n: boolean) {
@@ -99,11 +106,20 @@ export function setNightMode(n: boolean) {
 
 export function setMuted(m: boolean) {
   muted = m;
-  if (ctx) master.gain.setTargetAtTime(m ? 0 : 0.7, ctx.currentTime, 0.1);
+  if (!ctx) return;
+  const c = ctx;
+  master.gain.setTargetAtTime(m ? 0 : 0.7, c.currentTime, 0.05);
+  if (m) {
+    // Fade out, then halt the whole audio engine so nothing can leak through.
+    setTimeout(() => {
+      if (muted) void c.suspend();
+    }, 300);
+  } else void c.resume();
 }
 
 export function stopAudio() {
   clearInterval(birdTimer);
+  birdTimer = undefined;
 }
 
 function blip(freq: number, dur = 0.12, type: OscillatorType = "triangle", vol = 0.12, delay = 0) {

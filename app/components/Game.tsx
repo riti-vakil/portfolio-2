@@ -200,10 +200,11 @@ export default function Game() {
   };
 
   const toggleSound = () => {
-    initAudio();
-    setMuted(!muted);
-    setMutedState(!muted);
-    if (muted) sfx.unmute();
+    const next = !muted;
+    if (!next) initAudio();
+    setMuted(next);
+    setMutedState(next);
+    if (!next) sfx.unmute();
   };
 
   return (
