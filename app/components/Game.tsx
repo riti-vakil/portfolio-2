@@ -30,7 +30,7 @@ function Hall({ section, night, onClose }: { section: SectionId; night: boolean;
   return (
     <section
       key={section}
-      className={`hall-in absolute right-4 top-20 bottom-4 z-20 w-[min(94vw,34rem)] overflow-y-auto rounded-3xl border p-6 shadow-2xl backdrop-blur-md max-md:left-4 max-md:right-4 max-md:bottom-24 md:right-8 md:top-24 md:bottom-8 ${card}`}
+      className={`hall-in absolute right-4 top-20 bottom-4 z-20 w-[min(94vw,34rem)] overflow-y-auto rounded-3xl border p-4 shadow-2xl md:p-6 backdrop-blur-md portrait:left-4 portrait:right-4 portrait:top-[46%] portrait:bottom-4 portrait:w-auto md:right-8 md:top-24 md:bottom-8 ${card}`}
     >
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-2xl font-bold">
@@ -208,7 +208,7 @@ export default function Game() {
   };
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
+    <div className="relative h-dvh w-screen overflow-hidden">
       <Canvas
         shadows
         dpr={[1, 1.5]}
@@ -223,8 +223,8 @@ export default function Game() {
       </Canvas>
 
       {!section && (
-        <div className="pointer-events-none absolute inset-x-0 top-[14%] px-6 text-center text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.35)]">
-          <h1 className="min-h-[1.2em] text-4xl font-bold md:text-6xl">
+        <div className="pointer-events-none absolute inset-x-0 top-[12%] px-6 text-center text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.35)]">
+          <h1 className="min-h-[1.2em] text-3xl font-bold sm:text-4xl md:text-6xl">
             {first}
             {!onSecond && <span className="caret">|</span>}
           </h1>

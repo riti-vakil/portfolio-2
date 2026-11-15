@@ -40,16 +40,30 @@ const C = {
   moonLight: new THREE.Color("#c9d6ff"),
 };
 
+const TMP_POS = new THREE.Vector3();
+const TMP_LOOK = new THREE.Vector3();
+
+// Adapts the framing to the screen: on tall/narrow screens pull back so the whole island fits,
+// and on phones lift the island into the upper half so the info panel can sit below it.
 function CameraRig({ section }: { section: SectionId | null }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const look = useRef(new THREE.Vector3(...VIEWS.home.look));
-  const tmp = useMemo(() => new THREE.Vector3(), []);
   useFrame(({ clock }, dt) => {
-    const v = VIEWS[section ?? "home"];
+    const aspect = size.width / size.height;
+    const phone = aspect < 1;
+    const v = phone ? VIEWS.home : VIEWS[section ?? "home"];
+    const f = Math.min(2.5, Math.max(1, 1.7 / aspect));
+    TMP_LOOK.set(...v.look);
+    TMP_POS.set(...v.pos).sub(TMP_LOOK).multiplyScalar(f).add(TMP_LOOK);
+    if (phone) {
+      const visibleHeight = 2 * TMP_POS.distanceTo(TMP_LOOK) * Math.tan(THREE.MathUtils.degToRad(21));
+      const shift = visibleHeight * (section ? 0.22 : 0.04);
+      TMP_LOOK.y -= shift;
+    }
     const k = 1 - Math.pow(0.04, Math.min(dt, 0.05));
-    tmp.set(v.pos[0], v.pos[1] + Math.sin(clock.elapsedTime * 0.4) * 0.12, v.pos[2]);
-    camera.position.lerp(tmp, k);
-    look.current.lerp(tmp.set(...v.look), k);
+    TMP_POS.y += Math.sin(clock.elapsedTime * 0.4) * 0.12;
+    camera.position.lerp(TMP_POS, k);
+    look.current.lerp(TMP_LOOK, k);
     camera.lookAt(look.current);
   });
   return null;
